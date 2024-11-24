@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .background-container {
+            background-image: url('/api/placeholder/1920/1080');  /* Aquí irá tu imagen de Canva */
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .answer-option {
+            display: inline-block;
+            background-color: rgba(255, 192, 203, 0.9);
+            color: #333;
+            padding: 5px 15px;
+            margin: 0 5px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .answer-option:hover {
+            background-color: rgba(255, 182, 193, 0.9);
+        }
+
+        .answer-space {
+            display: inline-block;
+            width: 100px;
+            height: 25px;
+            border-bottom: 2px solid rgba(255, 192, 203, 0.9);
+            margin: 0 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .answer-space.correct {
+            background-color: rgba(144, 238, 144, 0.3);
+            border-bottom-color: #4CAF50;
+        }
+
+        .answer-space.incorrect {
+            background-color: rgba(255, 99, 71, 0.3);
+            border-bottom-color: #f44336;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: rgba(255, 192, 203, 0.9);
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: rgba(255, 182, 193, 0.9);
+        }
+
+        #score {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="answers-bank">
+            <span class="answer-option" onclick="selectOption('bien')">bien</span>
+            <span class="answer-option" onclick="selectOption('bueno')">bueno</span>
+            <span class="answer-option" onclick="selectOption('buen')">buen</span>
+            <span class="answer-option" onclick="selectOption('buena')">buena</span>
+            <span class="answer-option" onclick="selectOption('buenas')">buenas</span>
+        </div>
+
+        <div id="exercise-content">
+            <!-- El contenido se generará dinámicamente con JavaScript -->
+        </div>
+
+        <div class="controls">
+            <button onclick="checkAnswers()">Verificar respuestas</button>
+            <button onclick="resetExercise()">Reiniciar</button>
+            <div id="score">Respuestas correctas: 0/13</div>
+        </div>
+    </div>
+
+    <script>
+        const sentences = [
+            { text: "Espero que todos estén ", answer: "bien", id: 1 },
+            { text: "Quisiera cenar con un ", answer: "buen", suffix: " vino.", id: 2 },
+            { text: "Tomar mucha agua es ", answer: "bueno", suffix: " para la salud.", id: 3 },
+            { text: "Me parece que está ", answer: "bien", suffix: " así.", id: 4 },
+            { text: "Mi vecina es ", answer: "buena", suffix: " simpática.", id: 5 },
+            { text: "Mi hijo es muy ", answer: "buen", suffix: " estudiante.", id: 6 },
+            { text: "Todas son muy ", answer: "buenas", suffix: " personas.", id: 7 },
+            { text: "Naja es ", answer: "buena", suffix: " con los idiomas.", id: 8 },
+            { text: "Tomar vino sin haber comido, no me cae ", answer: "bien", id: 9 },
+            { text: "A la banda de mi hijo le va muy ", answer: "bien", id: 10 },
+            { text: "Los niños deben portarse ", answer: "bien", suffix: " en el colegio.", id: 11 },
+            { text: "Que ", answer: "buena", suffix: " te quedó esta pasta.", id: 12 },
+            { text: "Debes conocer a mi amigo, está super ", answer: "bueno", id: 13 }
+        ];
+
+        let selectedOption = '';
+        let currentSelection = null;
+
+        function generateExercise() {
+            const container = document.getElementById('exercise-content');
+            sentences.forEach(sentence => {
+                const div = document.createElement('div');
+                div.style.margin = '20px 0';
+                div.innerHTML = `
+                    ${sentence.text}
+                    <span class="answer-space" onclick="selectSpace(this)" data-answer="${sentence.answer}" data-id="${sentence.id}"></span>
+                    ${sentence.suffix || ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectOption(option) {
+            selectedOption = option;
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.backgroundColor = 'rgba(255, 192, 203, 0.9)';
+            });
+            event.target.style.backgroundColor = 'rgba(255, 182, 193, 0.9)';
+        }
+
+        function selectSpace(space) {
+            if (selectedOption) {
+                space.textContent = selectedOption;
+                space.classList.remove('correct', 'incorrect');
+            }
+        }
+
+        function checkAnswers() {
+            let correct = 0;
+            document.querySelectorAll('.answer-space').forEach(space => {
+                const isCorrect = space.textContent === space.dataset.answer;
+                space.classList.remove('correct', 'incorrect');
+                space.classList.add(isCorrect ? 'correct' : 'incorrect');
+                if (isCorrect) correct++;
+            });
+            document.getElementById('score').textContent = `Respuestas correctas: ${correct}/13`;
+        }
+
+        function resetExercise() {
+            document.querySelectorAll('.answer-space').forEach(space => {
+                space.textContent = '';
+                space.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('score').textContent = 'Respuestas correctas: 0/13';
+            selectedOption = '';
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.style.backgroundColor = 'rgba(255, 192, 203, 0.9)';
+            });
+        }
+
+        window.onload = generateExercise;
+    </script>
+</body>
+</html>
